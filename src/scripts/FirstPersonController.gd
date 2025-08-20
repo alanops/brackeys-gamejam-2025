@@ -4,13 +4,16 @@ const SPEED = 5.0
 const JUMP_VELOCITY = 6.0
 const MOUSE_SENSITIVITY = 0.002
 const GAMEPAD_SENSITIVITY = 2.0
+const NOCLIP_SPEED = 10.0
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+var noclip_enabled = false
 
 @onready var camera = $Camera3D
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	add_to_group("player")
 
 func _input(event):
 	# Mouse look
@@ -39,6 +42,14 @@ func _process(delta):
 		camera.rotation.x = clamp(camera.rotation.x, -1.5, 1.5)
 
 func _physics_process(delta):
+	if noclip_enabled:
+		handle_noclip_movement(delta)
+	else:
+		handle_normal_movement(delta)
+	
+	move_and_slide()
+
+func handle_normal_movement(delta):
 	# Add gravity
 	if not is_on_floor():
 		velocity.y -= gravity * delta
@@ -62,4 +73,22 @@ func _physics_process(delta):
 		velocity.x = move_toward(velocity.x, 0, SPEED * delta * 5)
 		velocity.z = move_toward(velocity.z, 0, SPEED * delta * 5)
 
-	move_and_slide()
+func handle_noclip_movement(delta):
+	# Get input direction
+	var input_dir = Vector3()
+	input_dir.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
+	input_dir.z = Input.get_action_strength("move_back") - Input.get_action_strength("move_forward")
+	input_dir.y = Input.get_action_strength("jump") - Input.get_action_strength("move_down")
+	
+	# Transform to camera space for true free flight
+	var cam_transform = camera.global_transform
+	var movement = cam_transform.basis * input_dir
+	
+	velocity = movement.normalized() * NOCLIP_SPEED
+
+func toggle_noclip():
+	noclip_enabled = !noclip_enabled
+	if noclip_enabled:
+		set_collision_mask_value(1, false) # Disable collision with layer 1
+	else:
+		set_collision_mask_value(1, true) # Re-enable collision
