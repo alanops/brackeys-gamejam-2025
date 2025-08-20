@@ -26,6 +26,9 @@ A game created for [Brackeys Game Jam 2025.2](https://itch.io/jam/brackeys-14)
 - **Niko** - 3D Artist / Models / Animation & Polish
 - **Milo** - Sound Designer / Pixel Art & UI Backup
 
+## Play Online
+🎮 **Play Now**: https://alanops.itch.io/brackeys25
+
 ## Installation
 1. Download the latest build from the releases page
 2. Extract and run the executable
