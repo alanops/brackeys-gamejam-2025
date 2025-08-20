@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://bmqvnqx1oidwq"]
+
+[ext_resource type="Script" path="res://src/scripts/Main.gd" id="1_0xyem"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_0xyem")
+
+[node name="Label" type="Label" parent="."]
+offset_left = 512.0
+offset_top = 300.0
+offset_right = 768.0
+offset_bottom = 350.0
+text = "Brackeys Game Jam 2025
+[Working Title]"
+horizontal_alignment = 1
+vertical_alignment = 1
