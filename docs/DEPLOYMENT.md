@@ -4,7 +4,7 @@
 
 The project is configured to deploy to **itch.io** under the project name `brackeys25`.
 
-**Game URL**: https://alanops.itch.io/brackeys25
+**Game URL**: https://downfallgames.itch.io/brackeys25
 
 ## Manual Deployment
 
@@ -104,7 +104,7 @@ Before deploying:
    ```
 
 4. **Test Live**
-   - Visit: https://alanops.itch.io/brackeys25
+   - Visit: https://downfallgames.itch.io/brackeys25
    - Test in different browsers
    - Check performance on different devices
 

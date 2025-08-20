@@ -6,7 +6,7 @@
 set -e
 
 PROJECT_NAME="brackeys25"
-ITCH_USER="alanops"
+ITCH_USER="downfallgames"
 BUILD_DIR="builds/web"
 GODOT_EXPORT_TEMPLATE="HTML5"
 
@@ -59,4 +59,4 @@ echo "📦 Deploying version $VERSION to itch.io..."
 butler push "$BUILD_DIR" "$ITCH_USER/$PROJECT_NAME:html5" --userversion "$VERSION"
 
 echo "✅ Deployment complete!"
-echo "🌐 Play at: https://$ITCH_USER.itch.io/$PROJECT_NAME"
+echo "🌐 Play at: https://downfallgames.itch.io/$PROJECT_NAME"
