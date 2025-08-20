@@ -1,6 +1,6 @@
-[gd_scene load_steps=10 format=3 uid="uid://dvr8vml5q3kbh"]
+[gd_scene load_steps=10 format=3 uid="uid://dak8obqviyn0w"]
 
-[ext_resource type="Script" path="res://src/scripts/DungeonRoom.gd" id="1_gvkxm"]
+[ext_resource type="Script" uid="uid://bohrm6mxf2j3d" path="res://src/scripts/DungeonRoom.gd" id="1_gvkxm"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_horizon_color = Color(0.05, 0.05, 0.1, 1)
