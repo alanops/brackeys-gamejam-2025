@@ -28,6 +28,10 @@ func _input(event):
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		else:
 			get_tree().change_scene_to_file("res://src/scenes/Main.tscn")
+	
+	# Reset scene
+	if event.is_action_pressed("reset_scene"):
+		get_tree().reload_current_scene()
 
 func _process(delta):
 	# Gamepad look

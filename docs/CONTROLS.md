@@ -8,6 +8,7 @@
 - **Space** - Jump
 - **Mouse** - Look around
 - **ESC** - Pause/Release mouse
+- **R** - Reset scene (dev tool)
 
 ## Gamepad Controls (Xbox/PlayStation)
 - **Left Stick** - Move (forward/back/strafe)

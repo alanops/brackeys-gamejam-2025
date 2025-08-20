@@ -84,6 +84,7 @@ Global system managing all dev tools:
 | F4 | Toggle Developer Console |
 | F5 | Toggle Noclip Mode |
 | F6 | Toggle Scene Switcher |
+| R | Reset Current Scene |
 | ESC | Release mouse / Pause |
 
 ## Developer Tips
