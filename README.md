@@ -1,6 +1,6 @@
-# Brackeys Game Jam 2025 - [Working Title]
+# Brackeys Game Jam 2025.2 - [Working Title]
 
-A game created for [Brackeys Game Jam 2025.1](https://itch.io/jam/brackeys-14)
+A game created for [Brackeys Game Jam 2025.2](https://itch.io/jam/brackeys-14)
 
 ## Theme: [TBD]
 
@@ -21,7 +21,10 @@ A game created for [Brackeys Game Jam 2025.1](https://itch.io/jam/brackeys-14)
 - [Other tools/libraries]
 
 ### Team
-- [Your name/handle]
+- **Alan** - Programming / DevOps / Producer / Multimedia Support
+- **Alex** - 2D Artist / Art Direction / Cover Art & Visual Identity  
+- **Niko** - 3D Artist / Models / Animation & Polish
+- **Milo** - Sound Designer / Pixel Art & UI Backup
 
 ## Installation
 1. Download the latest build from the releases page
