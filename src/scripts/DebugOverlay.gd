@@ -42,7 +42,7 @@ func create_debug_ui():
 	
 	# Debug Controls Info
 	var controls_label = Label.new()
-	controls_label.text = "F3: Debug | F4: Console | F5: Noclip | R: Reset"
+	controls_label.text = "`: Debug | ~: Console | N: Noclip | M: Scenes | R: Reset"
 	controls_label.add_theme_font_size_override("font_size", 12)
 	controls_label.add_theme_color_override("font_color", Color.GRAY)
 	vbox.add_child(controls_label)
@@ -73,5 +73,5 @@ func set_player_reference(player: Node3D):
 	player_ref = player
 
 func _input(event):
-	if event.is_action_pressed("ui_page_down"): # F3 key
+	if event.is_action_pressed("toggle_debug"):
 		visible = !visible

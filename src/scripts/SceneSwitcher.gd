@@ -52,7 +52,7 @@ func create_ui():
 	vbox.add_child(add_btn)
 
 func _input(event):
-	if event.is_action_pressed("ui_end"): # F6 key
+	if event.is_action_pressed("toggle_scene_switcher"):
 		visible = !visible
 		if visible:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)

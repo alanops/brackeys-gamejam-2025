@@ -3,8 +3,8 @@
 ## Overview
 Comprehensive set of developer tools and helpers for rapid prototyping and debugging during game development.
 
-## Debug Overlay (F3)
-**Hotkey**: F3 to toggle
+## Debug Overlay (`)
+**Hotkey**: ` (backtick) to toggle
 
 Displays real-time information:
 - **FPS Counter** (color-coded: Green 55+, Yellow 30+, Red <30)
@@ -13,8 +13,8 @@ Displays real-time information:
 - **Time Scale** (current multiplier)
 - **Controls Reference**
 
-## Developer Console (F4)
-**Hotkey**: F4 to toggle
+## Developer Console (~)
+**Hotkey**: ~ (tilde) to toggle
 
 ### Available Commands:
 - `help` - Show all commands
@@ -35,8 +35,8 @@ Displays real-time information:
 - **Auto-complete** - Tab completion for commands
 - **Color-coded Output** - Success (green), errors (red), info (yellow)
 
-## Noclip Mode (F5)
-**Hotkey**: F5 to toggle, or use console command `noclip`
+## Noclip Mode (N)
+**Hotkey**: N to toggle, or use console command `noclip`
 
 Features:
 - **Free Flight** - Move in any direction including up/down
@@ -45,8 +45,8 @@ Features:
 - **Vertical Movement** - Space (up) / Page Down (down)
 - **Faster Speed** - 10 units/sec vs normal 5 units/sec
 
-## Scene Switcher (F6)
-**Hotkey**: F6 to toggle
+## Scene Switcher (M)
+**Hotkey**: M to toggle
 
 Quick scene navigation:
 - **Predefined Scenes** - Main Menu, Dungeon Room, Test scenes
@@ -80,20 +80,20 @@ Global system managing all dev tools:
 ## Hotkey Reference
 | Key | Function |
 |-----|----------|
-| F3 | Toggle Debug Overlay |
-| F4 | Toggle Developer Console |
-| F5 | Toggle Noclip Mode |
-| F6 | Toggle Scene Switcher |
+| ` | Toggle Debug Overlay |
+| ~ | Toggle Developer Console |
+| N | Toggle Noclip Mode |
+| M | Toggle Scene Switcher |
 | R | Reset Current Scene |
 | ESC | Release mouse / Pause |
 
 ## Developer Tips
 
 ### Quick Testing Workflow:
-1. Press F3 to monitor performance
-2. Use F6 to quickly switch between test scenes
-3. Press F5 for noclip to explore level geometry
-4. Use F4 console for precise testing (teleport, timescale)
+1. Press ` to monitor performance
+2. Use M to quickly switch between test scenes
+3. Press N for noclip to explore level geometry
+4. Use ~ console for precise testing (teleport, timescale)
 
 ### Performance Testing:
 - Use `timescale` to test game logic at different speeds

@@ -64,7 +64,7 @@ func create_console_ui():
 	write_line("Type 'help' for available commands")
 
 func _input(event):
-	if event.is_action_pressed("ui_home"): # F4 key
+	if event.is_action_pressed("toggle_console"):
 		toggle_console()
 	
 	if visible:

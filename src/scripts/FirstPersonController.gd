@@ -32,6 +32,10 @@ func _input(event):
 	# Reset scene
 	if event.is_action_pressed("reset_scene"):
 		get_tree().reload_current_scene()
+	
+	# Toggle noclip
+	if event.is_action_pressed("toggle_noclip"):
+		toggle_noclip()
 
 func _process(delta):
 	# Gamepad look
