@@ -19,3 +19,15 @@ func spawn_player():
 	# Disable the static camera since player has its own
 	if has_node("Camera3D"):
 		$Camera3D.current = false
+	
+	# Connect player to debug/dev systems
+	connect_player_to_systems(player)
+
+func connect_player_to_systems(player: Node3D):
+	# Connect to debug overlay
+	if GameManager.debug_overlay and GameManager.debug_overlay.has_method("set_player_reference"):
+		GameManager.debug_overlay.set_player_reference(player)
+	
+	# Connect to movement tuner
+	if GameManager.movement_tuner and GameManager.movement_tuner.has_method("set_player_reference"):
+		GameManager.movement_tuner.set_player_reference(player)

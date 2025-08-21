@@ -24,6 +24,18 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var noclip_enabled = false
 var mouse_sensitivity_multiplier = 1.0
 
+# Dynamic movement parameters (can be modified by MovementTuner)
+var walk_speed = WALK_SPEED
+var sprint_speed = SPRINT_SPEED
+var jump_velocity = JUMP_VELOCITY
+var acceleration = ACCELERATION
+var friction = FRICTION
+var air_acceleration = AIR_ACCELERATION
+var air_friction = AIR_FRICTION
+var step_up_velocity = 5.0
+var max_step_height = MAX_STEP_HEIGHT
+var mouse_sensitivity = MOUSE_SENSITIVITY
+
 @onready var camera = $Camera3D
 
 func _ready():
@@ -40,7 +52,7 @@ func _input(event):
 	
 	# Mouse look
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		var mouse_delta = event.relative * MOUSE_SENSITIVITY * mouse_sensitivity_multiplier
+		var mouse_delta = event.relative * mouse_sensitivity * mouse_sensitivity_multiplier
 		rotate_y(-mouse_delta.x)
 		camera.rotate_x(-mouse_delta.y)
 		camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
@@ -91,7 +103,7 @@ func handle_normal_movement(delta):
 
 	# Handle jump
 	if Input.is_action_just_pressed("jump") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
+		velocity.y = jump_velocity
 
 	# Get input direction
 	var input_dir = Vector2()
@@ -102,11 +114,11 @@ func handle_normal_movement(delta):
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	# Determine current speed based on sprinting
-	var current_speed = SPRINT_SPEED if Input.is_action_pressed("sprint") else WALK_SPEED
+	var current_speed = sprint_speed if Input.is_action_pressed("sprint") else walk_speed
 	
 	# Get current acceleration and friction values
-	var accel = ACCELERATION if is_on_floor() else AIR_ACCELERATION
-	var friction_val = FRICTION if is_on_floor() else AIR_FRICTION
+	var accel = acceleration if is_on_floor() else air_acceleration
+	var friction_val = friction if is_on_floor() else air_friction
 	
 	# Apply movement with smooth acceleration/deceleration
 	if direction:
@@ -135,9 +147,9 @@ func handle_noclip_movement(delta):
 	velocity = movement.normalized() * NOCLIP_SPEED * speed_multiplier
 
 func handle_step_up(delta):
-	# Simple step-up: if we're moving horizontally and hit something, add upward velocity
+	# Only try step-up if we're moving horizontally and not already going up
 	var horizontal_velocity = Vector3(velocity.x, 0, velocity.z)
-	if horizontal_velocity.length() < 0.1:
+	if horizontal_velocity.length() < 0.1 or velocity.y > 1.0:
 		return
 		
 	# Check if we collided with something while moving forward
@@ -145,13 +157,42 @@ func handle_step_up(delta):
 		var collision = get_slide_collision(i)
 		var collision_normal = collision.get_normal()
 		
+		# Only help with forward-facing walls (not side-sliding)
+		var movement_dot = horizontal_velocity.normalized().dot(-collision_normal)
+		if movement_dot < 0.5:  # We're not moving directly into the wall
+			continue
+			
 		# If we hit a wall (normal pointing roughly horizontal)
-		if abs(collision_normal.y) < 0.7:
+		if abs(collision_normal.y) < 0.6:
 			# Check if the collision point is low enough to be a step
 			var collision_height = collision.get_position().y - global_position.y
-			if collision_height > -1.0 and collision_height < MAX_STEP_HEIGHT:
-				# Add upward velocity to help climb the step
-				velocity.y = max(velocity.y, 5.0)
+			if collision_height > -0.8 and collision_height < max_step_height:
+				# Add gentle upward velocity - much more subtle
+				velocity.y = max(velocity.y, step_up_velocity * 0.4)
+				break  # Only help with one step at a time
+
+func set_movement_parameter(param_name: String, value: float):
+	match param_name:
+		"walk_speed":
+			walk_speed = value
+		"sprint_speed":
+			sprint_speed = value
+		"jump_velocity":
+			jump_velocity = value
+		"acceleration":
+			acceleration = value
+		"friction":
+			friction = value
+		"air_acceleration":
+			air_acceleration = value
+		"air_friction":
+			air_friction = value
+		"step_up_velocity":
+			step_up_velocity = value
+		"max_step_height":
+			max_step_height = value
+		"mouse_sensitivity":
+			mouse_sensitivity = value
 
 func toggle_noclip():
 	noclip_enabled = !noclip_enabled

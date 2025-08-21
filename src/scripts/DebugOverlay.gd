@@ -42,7 +42,7 @@ func create_debug_ui():
 	
 	# Debug Controls Info
 	var controls_label = Label.new()
-	controls_label.text = "`: Debug | ~: Console | N: Noclip | M: Scenes | P: Perf | R: Reset"
+	controls_label.text = "`: Debug | ~: Console | N: Noclip | M: Scenes | P: Perf | T: Tuner | R: Reset"
 	controls_label.add_theme_font_size_override("font_size", 11)
 	controls_label.add_theme_color_override("font_color", Color.GRAY)
 	vbox.add_child(controls_label)
