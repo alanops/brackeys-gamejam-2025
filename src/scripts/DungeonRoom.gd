@@ -31,3 +31,9 @@ func connect_player_to_systems(player: Node3D):
 	# Connect to movement tuner
 	if GameManager.movement_tuner and GameManager.movement_tuner.has_method("set_player_reference"):
 		GameManager.movement_tuner.set_player_reference(player)
+	
+	# Connect to camera overlay
+	if GameManager.camera_overlay and GameManager.camera_overlay.has_method("set_camera_controller"):
+		var camera_controller = player.get_node("CameraController")
+		if camera_controller:
+			GameManager.camera_overlay.set_camera_controller(camera_controller)

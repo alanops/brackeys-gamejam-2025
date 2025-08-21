@@ -7,12 +7,14 @@ var dev_console_scene = preload("res://src/scenes/DevConsole.tscn")
 var scene_switcher_scene = preload("res://src/scenes/SceneSwitcher.tscn")
 var performance_overlay_scene = preload("res://src/scenes/PerformanceOverlay.tscn")
 var movement_tuner_script = preload("res://src/scripts/MovementTuner.gd")
+var camera_overlay_script = preload("res://src/scripts/CameraOverlay.gd")
 
 var debug_overlay: CanvasLayer
 var dev_console: CanvasLayer
 var scene_switcher: Control
 var performance_overlay: CanvasLayer
 var movement_tuner: CanvasLayer
+var camera_overlay: CanvasLayer
 
 func _ready():
 	# Make this a singleton
@@ -24,6 +26,7 @@ func _ready():
 	setup_scene_switcher()
 	setup_performance_overlay()
 	setup_movement_tuner()
+	setup_camera_overlay()
 	
 	# Register custom project settings
 	register_debug_settings()
@@ -51,6 +54,11 @@ func setup_movement_tuner():
 	movement_tuner = CanvasLayer.new()
 	movement_tuner.set_script(movement_tuner_script)
 	add_child(movement_tuner)
+
+func setup_camera_overlay():
+	camera_overlay = CanvasLayer.new()
+	camera_overlay.set_script(camera_overlay_script)
+	add_child(camera_overlay)
 
 func _on_console_command(command: String, args: Array):
 	# Handle global commands here

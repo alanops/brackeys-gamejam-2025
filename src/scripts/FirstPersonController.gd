@@ -9,9 +9,9 @@ const FRICTION = 12.0
 const AIR_ACCELERATION = 2.0
 const AIR_FRICTION = 1.0
 
-# Step-up system
-const MAX_STEP_HEIGHT = 0.5
-const STEP_UP_RAYCAST_LENGTH = 0.8
+# Simple step-up system for larger obstacles
+const MAX_STEP_HEIGHT = 0.4
+const STEP_UP_FORCE = 3.0
 
 # Look sensitivity
 const MOUSE_SENSITIVITY = 0.002
@@ -32,12 +32,12 @@ var acceleration = ACCELERATION
 var friction = FRICTION
 var air_acceleration = AIR_ACCELERATION
 var air_friction = AIR_FRICTION
-var step_up_velocity = 5.0
+var step_up_velocity = STEP_UP_FORCE
 var max_step_height = MAX_STEP_HEIGHT
 var mouse_sensitivity = MOUSE_SENSITIVITY
 
 @onready var camera = $Camera3D
-@onready var procedural_ik = $ProceduralStepIK
+@onready var camera_controller = $CameraController
 
 func _ready():
 	add_to_group("player")
@@ -51,12 +51,13 @@ func _input(event):
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		return
 	
-	# Mouse look
+	# Mouse look (only in first person mode)
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		var mouse_delta = event.relative * mouse_sensitivity * mouse_sensitivity_multiplier
-		rotate_y(-mouse_delta.x)
-		camera.rotate_x(-mouse_delta.y)
-		camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
+		if camera_controller and camera_controller.camera_mode == camera_controller.CameraMode.FIRST_PERSON:
+			var mouse_delta = event.relative * mouse_sensitivity * mouse_sensitivity_multiplier
+			rotate_y(-mouse_delta.x)
+			camera.rotate_x(-mouse_delta.y)
+			camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
 	
 	# Pause/menu
 	if event.is_action_pressed("pause"):
@@ -93,11 +94,9 @@ func _physics_process(delta):
 	
 	move_and_slide()
 	
-	# Handle step-up after moving to detect collisions
-	# Only use manual step-up if IK is disabled or not available
+	# Simple step-up assistance for larger obstacles
 	if not noclip_enabled and is_on_floor():
-		if not procedural_ik or not procedural_ik.enabled:
-			handle_step_up(delta)
+		handle_step_up(delta)
 
 func handle_normal_movement(delta):
 	# Add gravity
@@ -150,29 +149,24 @@ func handle_noclip_movement(delta):
 	velocity = movement.normalized() * NOCLIP_SPEED * speed_multiplier
 
 func handle_step_up(delta):
-	# Only try step-up if we're moving horizontally and not already going up
-	var horizontal_velocity = Vector3(velocity.x, 0, velocity.z)
-	if horizontal_velocity.length() < 0.1 or velocity.y > 1.0:
+	# Simple step-up: small upward boost when hitting walls while moving
+	if velocity.y > 1.0:  # Don't interfere if already jumping
 		return
 		
-	# Check if we collided with something while moving forward
+	var horizontal_speed = Vector3(velocity.x, 0, velocity.z).length()
+	if horizontal_speed < 1.0:  # Only when moving
+		return
+	
+	# Check for wall collisions
 	for i in get_slide_collision_count():
 		var collision = get_slide_collision(i)
-		var collision_normal = collision.get_normal()
+		var normal = collision.get_normal()
 		
-		# Only help with forward-facing walls (not side-sliding)
-		var movement_dot = horizontal_velocity.normalized().dot(-collision_normal)
-		if movement_dot < 0.5:  # We're not moving directly into the wall
-			continue
-			
-		# If we hit a wall (normal pointing roughly horizontal)
-		if abs(collision_normal.y) < 0.6:
-			# Check if the collision point is low enough to be a step
-			var collision_height = collision.get_position().y - global_position.y
-			if collision_height > -0.8 and collision_height < max_step_height:
-				# Add gentle upward velocity - much more subtle
-				velocity.y = max(velocity.y, step_up_velocity * 0.4)
-				break  # Only help with one step at a time
+		# If hitting a roughly vertical surface (wall/step)
+		if normal.y < 0.3 and normal.y > -0.3:
+			# Add small upward boost
+			velocity.y = max(velocity.y, step_up_velocity)
+			break
 
 func set_movement_parameter(param_name: String, value: float):
 	match param_name:
@@ -202,14 +196,6 @@ func set_movement_parameter(param_name: String, value: float):
 			max_step_height = value
 		"mouse_sensitivity":
 			mouse_sensitivity = value
-		"ik_smoothing":
-			if procedural_ik:
-				procedural_ik.smoothing_speed = value
-				print("IK smoothing set to: ", value)
-		"ik_step_height":
-			if procedural_ik:
-				procedural_ik.step_height_offset = value
-				print("IK step height set to: ", value)
 
 func toggle_noclip():
 	noclip_enabled = !noclip_enabled
