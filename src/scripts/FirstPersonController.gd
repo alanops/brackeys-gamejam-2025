@@ -37,6 +37,7 @@ var max_step_height = MAX_STEP_HEIGHT
 var mouse_sensitivity = MOUSE_SENSITIVITY
 
 @onready var camera = $Camera3D
+@onready var procedural_ik = $ProceduralStepIK
 
 func _ready():
 	add_to_group("player")
@@ -93,8 +94,10 @@ func _physics_process(delta):
 	move_and_slide()
 	
 	# Handle step-up after moving to detect collisions
+	# Only use manual step-up if IK is disabled or not available
 	if not noclip_enabled and is_on_floor():
-		handle_step_up(delta)
+		if not procedural_ik or not procedural_ik.enabled:
+			handle_step_up(delta)
 
 func handle_normal_movement(delta):
 	# Add gravity
@@ -199,6 +202,14 @@ func set_movement_parameter(param_name: String, value: float):
 			max_step_height = value
 		"mouse_sensitivity":
 			mouse_sensitivity = value
+		"ik_smoothing":
+			if procedural_ik:
+				procedural_ik.smoothing_speed = value
+				print("IK smoothing set to: ", value)
+		"ik_step_height":
+			if procedural_ik:
+				procedural_ik.step_height_offset = value
+				print("IK step height set to: ", value)
 
 func toggle_noclip():
 	noclip_enabled = !noclip_enabled

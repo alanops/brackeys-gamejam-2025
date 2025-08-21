@@ -16,6 +16,8 @@ var movement_params = {
 	"step_up_velocity": {"min": 2.0, "max": 10.0, "step": 0.1, "default": 5.0},
 	"max_step_height": {"min": 0.2, "max": 1.0, "step": 0.1, "default": 0.5},
 	"mouse_sensitivity": {"min": 0.0005, "max": 0.005, "step": 0.0001, "default": 0.002},
+	"ik_smoothing": {"min": 2.0, "max": 15.0, "step": 0.5, "default": 8.0},
+	"ik_step_height": {"min": 0.05, "max": 0.5, "step": 0.05, "default": 0.2},
 }
 
 func _ready():
@@ -43,6 +45,13 @@ func create_tuner_ui():
 	for param_name in movement_params:
 		var param_data = movement_params[param_name]
 		create_parameter_slider(vbox, param_name, param_data)
+	
+	# IK Toggle
+	var ik_toggle = CheckBox.new()
+	ik_toggle.text = "Enable Procedural IK"
+	ik_toggle.button_pressed = true
+	ik_toggle.toggled.connect(_on_ik_toggled)
+	vbox.add_child(ik_toggle)
 	
 	# Reset button
 	var reset_btn = Button.new()
@@ -99,6 +108,12 @@ func _on_parameter_changed(param_name: String, label: Label, value: float):
 		print("Updated %s to %.3f" % [param_name, value])  # Debug output
 	else:
 		print("No player reference for parameter update: %s" % param_name)
+
+func _on_ik_toggled(pressed: bool):
+	if player_ref and player_ref.has_node("ProceduralStepIK"):
+		var ik_node = player_ref.get_node("ProceduralStepIK")
+		ik_node.enabled = pressed
+		print("Procedural IK ", "enabled" if pressed else "disabled")
 
 func _on_reset_pressed():
 	for param_name in movement_params:
