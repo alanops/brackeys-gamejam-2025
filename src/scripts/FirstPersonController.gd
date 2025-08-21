@@ -1,13 +1,24 @@
 extends CharacterBody3D
 
-const SPEED = 5.0
+# Movement constants
+const WALK_SPEED = 5.0
+const SPRINT_SPEED = 8.5
 const JUMP_VELOCITY = 6.0
+const ACCELERATION = 10.0
+const FRICTION = 12.0
+const AIR_ACCELERATION = 2.0
+const AIR_FRICTION = 1.0
+
+# Look sensitivity
 const MOUSE_SENSITIVITY = 0.002
 const GAMEPAD_SENSITIVITY = 2.0
+
+# Noclip
 const NOCLIP_SPEED = 10.0
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var noclip_enabled = false
+var mouse_sensitivity_multiplier = 1.0
 
 @onready var camera = $Camera3D
 
@@ -25,9 +36,10 @@ func _input(event):
 	
 	# Mouse look
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
-		camera.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
-		camera.rotation.x = clamp(camera.rotation.x, -1.5, 1.5)
+		var mouse_delta = event.relative * MOUSE_SENSITIVITY * mouse_sensitivity_multiplier
+		rotate_y(-mouse_delta.x)
+		camera.rotate_x(-mouse_delta.y)
+		camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
 	
 	# Pause/menu
 	if event.is_action_pressed("pause"):
@@ -54,7 +66,7 @@ func _process(delta):
 	if look_input.length() > 0.1:
 		rotate_y(-look_input.x * GAMEPAD_SENSITIVITY * delta)
 		camera.rotate_x(-look_input.y * GAMEPAD_SENSITIVITY * delta)
-		camera.rotation.x = clamp(camera.rotation.x, -1.5, 1.5)
+		camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
 
 func _physics_process(delta):
 	if noclip_enabled:
@@ -73,7 +85,7 @@ func handle_normal_movement(delta):
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
-	# Get input direction using our custom actions
+	# Get input direction
 	var input_dir = Vector2()
 	input_dir.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
 	input_dir.y = Input.get_action_strength("move_back") - Input.get_action_strength("move_forward")
@@ -81,12 +93,23 @@ func handle_normal_movement(delta):
 	# Transform input to world space
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
+	# Determine current speed based on sprinting
+	var current_speed = SPRINT_SPEED if Input.is_action_pressed("sprint") else WALK_SPEED
+	
+	# Get current acceleration and friction values
+	var accel = ACCELERATION if is_on_floor() else AIR_ACCELERATION
+	var friction_val = FRICTION if is_on_floor() else AIR_FRICTION
+	
+	# Apply movement with smooth acceleration/deceleration
 	if direction:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
+		# Accelerate towards target velocity
+		var target_velocity = direction * current_speed
+		velocity.x = move_toward(velocity.x, target_velocity.x, accel * delta)
+		velocity.z = move_toward(velocity.z, target_velocity.z, accel * delta)
 	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED * delta * 5)
-		velocity.z = move_toward(velocity.z, 0, SPEED * delta * 5)
+		# Apply friction when no input
+		velocity.x = move_toward(velocity.x, 0, friction_val * delta)
+		velocity.z = move_toward(velocity.z, 0, friction_val * delta)
 
 func handle_noclip_movement(delta):
 	# Get input direction
@@ -99,7 +122,9 @@ func handle_noclip_movement(delta):
 	var cam_transform = camera.global_transform
 	var movement = cam_transform.basis * input_dir
 	
-	velocity = movement.normalized() * NOCLIP_SPEED
+	# Apply sprint multiplier to noclip
+	var speed_multiplier = 1.7 if Input.is_action_pressed("sprint") else 1.0
+	velocity = movement.normalized() * NOCLIP_SPEED * speed_multiplier
 
 func toggle_noclip():
 	noclip_enabled = !noclip_enabled
