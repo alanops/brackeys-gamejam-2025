@@ -65,6 +65,23 @@ Real-time performance metrics in top-right corner:
 - **Memory Usage** - RAM consumption in MB
 - **Smooth Averaging** - 60-frame rolling average for stability
 
+### Performance Targets
+
+| Metric | 🟢 Great | 🟡 Okay | 🔴 Fix It |
+|--------|----------|---------|-----------|
+| **FPS** | 60-120 | 30-60 | < 30 |
+| **CPU Time** | < 10ms | 10-16ms | > 16ms |
+| **GPU Time** | < 10ms | 10-16ms | > 16ms |
+| **Draw Calls** | < 500 | 500-1000 | > 1000 |
+| **RAM** | < 50MB | 50-100MB | > 100MB |
+
+### Quick Optimization Guide
+1. **FPS Drops** → Check what's spawning/calculating
+2. **High CPU** → Optimize scripts, reduce physics
+3. **High GPU** → Reduce particles, simplify shaders
+4. **Many Draw Calls** → Batch meshes, use texture atlases
+5. **Growing RAM** → Check for memory leaks, free unused resources
+
 ## Time Controls
 Accessible via console or direct hotkeys:
 - `timescale 0.5` - Half speed (slow motion)

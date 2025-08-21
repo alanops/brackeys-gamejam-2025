@@ -38,5 +38,11 @@ A game created for [Brackeys Game Jam 2025.2](https://itch.io/jam/brackeys-14)
 2. Open the project in Godot 4.x
 3. Press F5 to run
 
+## Documentation
+- [Controls Guide](docs/CONTROLS.md) - Input mappings and controls
+- [Dev Tools Guide](docs/DEV_TOOLS.md) - Debug overlays and console
+- [Performance Guide](docs/PERFORMANCE.md) - Optimization targets and tips
+- [Deployment Guide](docs/DEPLOYMENT.md) - Build and deploy to itch.io
+
 ## License
 This project is created for Brackeys Game Jam 2025
