@@ -5,10 +5,12 @@ extends Node
 var debug_overlay_scene = preload("res://src/scenes/DebugOverlay.tscn")
 var dev_console_scene = preload("res://src/scenes/DevConsole.tscn")
 var scene_switcher_scene = preload("res://src/scenes/SceneSwitcher.tscn")
+var performance_overlay_scene = preload("res://src/scenes/PerformanceOverlay.tscn")
 
 var debug_overlay: CanvasLayer
 var dev_console: CanvasLayer
 var scene_switcher: Control
+var performance_overlay: CanvasLayer
 
 func _ready():
 	# Make this a singleton
@@ -18,6 +20,7 @@ func _ready():
 	setup_debug_overlay()
 	setup_dev_console()
 	setup_scene_switcher()
+	setup_performance_overlay()
 	
 	# Register custom project settings
 	register_debug_settings()
@@ -36,6 +39,10 @@ func setup_dev_console():
 func setup_scene_switcher():
 	scene_switcher = scene_switcher_scene.instantiate()
 	add_child(scene_switcher)
+
+func setup_performance_overlay():
+	performance_overlay = performance_overlay_scene.instantiate()
+	add_child(performance_overlay)
 
 func _on_console_command(command: String, args: Array):
 	# Handle global commands here

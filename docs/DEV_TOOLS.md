@@ -54,6 +54,17 @@ Quick scene navigation:
 - **One-click Loading** - Instant scene transitions
 - **Scene Path Display** - Shows full resource paths
 
+## Performance Overlay (P)
+**Hotkey**: P to toggle
+
+Real-time performance metrics in top-right corner:
+- **FPS Counter** - Color-coded (Green 60+, Yellow 30+, Red <30)
+- **CPU Time** - Frame rendering time in milliseconds
+- **GPU Time** - Estimated GPU frame time
+- **Draw Calls** - Number of draw calls per frame
+- **Memory Usage** - RAM consumption in MB
+- **Smooth Averaging** - 60-frame rolling average for stability
+
 ## Time Controls
 Accessible via console or direct hotkeys:
 - `timescale 0.5` - Half speed (slow motion)
@@ -84,6 +95,7 @@ Global system managing all dev tools:
 | ~ | Toggle Developer Console |
 | N | Toggle Noclip Mode |
 | M | Toggle Scene Switcher |
+| P | Toggle Performance Overlay |
 | R | Reset Current Scene |
 | ESC | Release mouse / Pause |
 
