@@ -51,13 +51,7 @@ func _input(event):
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		return
 	
-	# Mouse look (only in first person mode)
-	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		if camera_controller and camera_controller.camera_mode == camera_controller.CameraMode.FIRST_PERSON:
-			var mouse_delta = event.relative * mouse_sensitivity * mouse_sensitivity_multiplier
-			rotate_y(-mouse_delta.x)
-			camera.rotate_x(-mouse_delta.y)
-			camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
+	# Mouse look is now handled by CameraController
 	
 	# Pause/menu
 	if event.is_action_pressed("pause"):
@@ -75,16 +69,8 @@ func _input(event):
 		toggle_noclip()
 
 func _process(delta):
-	# Gamepad look
-	var look_input = Vector2(
-		Input.get_action_strength("look_right") - Input.get_action_strength("look_left"),
-		Input.get_action_strength("look_down") - Input.get_action_strength("look_up")
-	)
-	
-	if look_input.length() > 0.1:
-		rotate_y(-look_input.x * GAMEPAD_SENSITIVITY * delta)
-		camera.rotate_x(-look_input.y * GAMEPAD_SENSITIVITY * delta)
-		camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
+	# Gamepad look is now handled by CameraController
+	pass
 
 func _physics_process(delta):
 	if noclip_enabled:
