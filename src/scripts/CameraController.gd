@@ -12,12 +12,14 @@ enum CameraMode {
 }
 
 @export var camera_mode: CameraMode = CameraMode.FIRST_PERSON
-@export var smooth_transition: bool = false
-@export var transition_speed: float = 8.0
+@export var smooth_transition: bool = true
+@export var position_smoothing: float = 5.0
+@export var rotation_smoothing: float = 8.0
 @export var mouse_sensitivity: float = 0.002
-@export var tracking_speed: float = 12.0
 @export var collision_check: bool = true
+@export var collision_offset: float = 0.3
 @export var auto_rotate_speed: float = 2.0
+@export var instant_switch: bool = true  # Instant jump on camera mode change
 
 var player: CharacterBody3D
 var first_person_camera: Camera3D
@@ -28,6 +30,9 @@ var camera_arm: Node3D
 
 # Camera tracking and collision
 var desired_position: Vector3
+var desired_rotation: Vector3
+var actual_position: Vector3
+var actual_rotation: Vector3
 var collision_mask: int = 1
 var camera_velocity: Vector3
 var last_player_velocity: Vector3
@@ -192,54 +197,76 @@ func update_camera_mode():
 			current_height = third_person_heights.get(camera_mode, 2.0)
 			current_angle = third_person_angles.get(camera_mode, -15.0)
 			
-			# IMMEDIATELY jump to new position (no smooth transition on mode change)
+			# Apply position immediately on mode change
 			apply_third_person_position()
-			# Force camera to be current after positioning
-			third_person_camera.current = true
+			# Force instant position if enabled
+			if instant_switch:
+				actual_position = desired_position
+				actual_rotation = Vector3(deg_to_rad(current_angle), 0, 0)
+				camera_arm.position = actual_position
+				third_person_camera.rotation.x = actual_rotation.x
 
 func update_third_person_camera(delta):
 	# Get current mode settings
 	var settings = tracking_settings.get(camera_mode, {"speed": 12.0, "offset": Vector3.ZERO})
-	var mode_tracking_speed = settings.get("speed", 12.0)
 	var mode_offset = settings.get("offset", Vector3.ZERO)
 	
 	# Calculate desired position: behind player at proper distance and height
 	var base_position = Vector3(mode_offset.x, current_height - 1.6, -current_distance)
 	desired_position = base_position
+	desired_rotation = Vector3(deg_to_rad(current_angle), 0, 0)
 	
 	# Apply collision detection if enabled
 	if collision_check:
-		desired_position = check_camera_collision(desired_position)
+		var checked_position = check_camera_collision(desired_position)
+		if checked_position != desired_position:
+			# Pull camera closer if collision detected
+			desired_position = checked_position
 	
-	if smooth_transition:
-		# Position the camera arm at the proper distance
-		camera_arm.position = camera_arm.position.lerp(desired_position, mode_tracking_speed * delta)
+	# Smooth camera movement and rotation
+	if smooth_transition and not instant_switch:
+		# Smooth position
+		actual_position = actual_position.lerp(desired_position, position_smoothing * delta)
+		camera_arm.position = actual_position
 		
-		# Camera itself stays at origin of camera_arm
-		third_person_camera.position = Vector3.ZERO
-		
-		# Apply base rotation angle for the camera mode
-		var target_rot = Vector3(deg_to_rad(current_angle), 0, 0)
-		third_person_camera.rotation.x = lerp_angle(third_person_camera.rotation.x, target_rot.x, transition_speed * delta)
+		# Smooth rotation
+		actual_rotation.x = lerp_angle(actual_rotation.x, desired_rotation.x, rotation_smoothing * delta)
+		third_person_camera.rotation.x = actual_rotation.x
 	else:
-		apply_third_person_position()
+		# Direct positioning
+		actual_position = desired_position
+		actual_rotation = desired_rotation
+		camera_arm.position = actual_position
+		third_person_camera.rotation = actual_rotation
+	
+	# Reset instant switch flag after first frame
+	if instant_switch:
+		instant_switch = false
+	
+	# Camera itself stays at origin of camera_arm
+	third_person_camera.position = Vector3.ZERO
 
 func apply_third_person_position():
 	var settings = tracking_settings.get(camera_mode, {"speed": 12.0, "offset": Vector3.ZERO})
 	var mode_offset = settings.get("offset", Vector3.ZERO)
 	
-	# Position camera arm at proper distance and height (negative Z for behind player)
-	var arm_position = Vector3(mode_offset.x, current_height - 1.6, -current_distance)
-	camera_arm.position = arm_position
+	# Calculate desired position
+	desired_position = Vector3(mode_offset.x, current_height - 1.6, -current_distance)
+	desired_rotation = Vector3(deg_to_rad(current_angle), 0, 0)
 	
-	# Camera at origin of arm, with base rotation
+	# Initialize actual position if needed
+	if actual_position == Vector3.ZERO:
+		actual_position = desired_position
+		actual_rotation = desired_rotation
+	
+	# Position camera
+	camera_arm.position = desired_position
 	third_person_camera.position = Vector3.ZERO
-	third_person_camera.rotation.x = deg_to_rad(current_angle)
-	third_person_camera.rotation.y = 0
-	third_person_camera.rotation.z = 0
-	
-	# Reset camera arm rotation for clean slate
+	third_person_camera.rotation = desired_rotation
 	camera_arm.rotation = Vector3.ZERO
+	
+	# Enable instant switch for next frame
+	instant_switch = true
 
 func update_camera_tracking(delta):
 	# Track player movement for responsive camera behavior
@@ -316,7 +343,7 @@ func check_camera_collision(target_pos: Vector3) -> Vector3:
 	if result:
 		# Move camera closer to avoid clipping
 		var hit_point = result.position
-		var safe_distance = player_pos.distance_to(hit_point) - 0.2  # 0.2 unit buffer
+		var safe_distance = player_pos.distance_to(hit_point) - collision_offset
 		var camera_direction = (desired_global - player_pos).normalized()
 		var safe_position = player_pos + camera_direction * max(safe_distance, 1.0)  # Minimum 1 unit distance
 		return camera_pivot.to_local(safe_position)
