@@ -114,9 +114,8 @@ func update_performance_metrics(delta):
 	frame_time_label.text = "CPU: %.1f ms" % avg_frame_time
 	frame_time_label.add_theme_color_override("font_color", frame_time_color)
 	
-	# GPU Time (estimated from render info)
-	var render_info = RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TYPE_GLOBAL, RenderingServer.RENDERING_INFO_TOTAL)
-	var gpu_time_ms = avg_frame_time * 0.6  # Rough estimation
+	# GPU Time (using Performance monitor)
+	var gpu_time_ms = Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
 	gpu_time_label.text = "GPU: %.1f ms" % gpu_time_ms
 	gpu_time_label.add_theme_color_override("font_color", Color.LIGHT_BLUE)
 	
