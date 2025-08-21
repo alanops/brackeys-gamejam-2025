@@ -117,16 +117,21 @@ func _ready():
 	last_player_velocity = player.velocity if player.velocity else Vector3.ZERO
 
 func _input(event):
-	if event.is_action_pressed("camera_first_person"):
-		set_camera_mode(CameraMode.FIRST_PERSON)
-	elif event.is_action_pressed("camera_third_close"):
-		set_camera_mode(CameraMode.OVER_THE_SHOULDER)
-	elif event.is_action_pressed("camera_third_medium"):
-		set_camera_mode(CameraMode.THIRD_PERSON_CLOSE)
-	elif event.is_action_pressed("camera_third_far"):
-		set_camera_mode(CameraMode.THIRD_PERSON_MEDIUM)
-	elif event.is_action_pressed("camera_top_down"):
-		set_camera_mode(CameraMode.GOD_MODE)
+	# Using direct key checks since we need 6 keys but only have 5 input actions
+	if event is InputEventKey and event.pressed:
+		match event.keycode:
+			49:  # Key 1
+				set_camera_mode(CameraMode.FIRST_PERSON)
+			50:  # Key 2
+				set_camera_mode(CameraMode.OVER_THE_SHOULDER)
+			51:  # Key 3
+				set_camera_mode(CameraMode.THIRD_PERSON_CLOSE)
+			52:  # Key 4
+				set_camera_mode(CameraMode.THIRD_PERSON_MEDIUM)
+			53:  # Key 5
+				set_camera_mode(CameraMode.THIRD_PERSON_FAR)
+			54:  # Key 6
+				set_camera_mode(CameraMode.GOD_MODE)
 	
 	# Handle mouse look for different camera modes
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -169,6 +174,7 @@ func set_camera_mode(new_mode: CameraMode):
 	update_camera_mode()
 
 func update_camera_mode():
+	print("\nSwitching to camera mode: ", get_camera_mode_name())
 	match camera_mode:
 		CameraMode.FIRST_PERSON:
 			first_person_camera.current = true
@@ -196,6 +202,7 @@ func update_camera_mode():
 			current_distance = third_person_distances.get(camera_mode, 4.0)
 			current_height = third_person_heights.get(camera_mode, 2.0)
 			current_angle = third_person_angles.get(camera_mode, -15.0)
+			print("Camera settings - Distance: ", current_distance, " Height: ", current_height, " Angle: ", current_angle)
 			
 			# Apply position immediately on mode change
 			apply_third_person_position()
@@ -205,6 +212,8 @@ func update_camera_mode():
 				actual_rotation = Vector3(deg_to_rad(current_angle), 0, 0)
 				camera_arm.position = actual_position
 				third_person_camera.rotation.x = actual_rotation.x
+				print("Camera arm position: ", camera_arm.position)
+				print("Third person camera global position: ", third_person_camera.global_position)
 
 func update_third_person_camera(delta):
 	# Get current mode settings
@@ -253,6 +262,11 @@ func apply_third_person_position():
 	# Calculate desired position
 	desired_position = Vector3(mode_offset.x, current_height - 1.6, -current_distance)
 	desired_rotation = Vector3(deg_to_rad(current_angle), 0, 0)
+	
+	print("Applying third person position:")
+	print("  Desired position: ", desired_position)
+	print("  Current distance: ", current_distance)
+	print("  Current height: ", current_height)
 	
 	# Initialize actual position if needed
 	if actual_position == Vector3.ZERO:
