@@ -9,6 +9,10 @@ const FRICTION = 12.0
 const AIR_ACCELERATION = 2.0
 const AIR_FRICTION = 1.0
 
+# Step-up system
+const MAX_STEP_HEIGHT = 0.5
+const STEP_UP_RAYCAST_LENGTH = 0.8
+
 # Look sensitivity
 const MOUSE_SENSITIVITY = 0.002
 const GAMEPAD_SENSITIVITY = 2.0
@@ -75,6 +79,10 @@ func _physics_process(delta):
 		handle_normal_movement(delta)
 	
 	move_and_slide()
+	
+	# Handle step-up after moving to detect collisions
+	if not noclip_enabled and is_on_floor():
+		handle_step_up(delta)
 
 func handle_normal_movement(delta):
 	# Add gravity
@@ -125,6 +133,25 @@ func handle_noclip_movement(delta):
 	# Apply sprint multiplier to noclip
 	var speed_multiplier = 1.7 if Input.is_action_pressed("sprint") else 1.0
 	velocity = movement.normalized() * NOCLIP_SPEED * speed_multiplier
+
+func handle_step_up(delta):
+	# Simple step-up: if we're moving horizontally and hit something, add upward velocity
+	var horizontal_velocity = Vector3(velocity.x, 0, velocity.z)
+	if horizontal_velocity.length() < 0.1:
+		return
+		
+	# Check if we collided with something while moving forward
+	for i in get_slide_collision_count():
+		var collision = get_slide_collision(i)
+		var collision_normal = collision.get_normal()
+		
+		# If we hit a wall (normal pointing roughly horizontal)
+		if abs(collision_normal.y) < 0.7:
+			# Check if the collision point is low enough to be a step
+			var collision_height = collision.get_position().y - global_position.y
+			if collision_height > -1.0 and collision_height < MAX_STEP_HEIGHT:
+				# Add upward velocity to help climb the step
+				velocity.y = max(velocity.y, 3.0)
 
 func toggle_noclip():
 	noclip_enabled = !noclip_enabled
