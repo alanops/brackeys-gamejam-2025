@@ -96,6 +96,9 @@ func _on_parameter_changed(param_name: String, label: Label, value: float):
 	# Update player parameter if reference exists
 	if player_ref and player_ref.has_method("set_movement_parameter"):
 		player_ref.set_movement_parameter(param_name, value)
+		print("Updated %s to %.3f" % [param_name, value])  # Debug output
+	else:
+		print("No player reference for parameter update: %s" % param_name)
 
 func _on_reset_pressed():
 	for param_name in movement_params:
@@ -136,6 +139,7 @@ func _on_load_preset():
 
 func set_player_reference(player: CharacterBody3D):
 	player_ref = player
+	print("Movement tuner connected to player: ", player.name if player else "null")
 
 func _input(event):
 	if event.is_action_pressed("toggle_movement_tuner"):

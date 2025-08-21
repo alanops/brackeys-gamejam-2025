@@ -175,20 +175,26 @@ func set_movement_parameter(param_name: String, value: float):
 	match param_name:
 		"walk_speed":
 			walk_speed = value
+			print("Player walk_speed set to: ", value)
 		"sprint_speed":
 			sprint_speed = value
+			print("Player sprint_speed set to: ", value)
 		"jump_velocity":
 			jump_velocity = value
+			print("Player jump_velocity set to: ", value)
 		"acceleration":
 			acceleration = value
+			print("Player acceleration set to: ", value)
 		"friction":
 			friction = value
+			print("Player friction set to: ", value)
 		"air_acceleration":
 			air_acceleration = value
 		"air_friction":
 			air_friction = value
 		"step_up_velocity":
 			step_up_velocity = value
+			print("Player step_up_velocity set to: ", value)
 		"max_step_height":
 			max_step_height = value
 		"mouse_sensitivity":
