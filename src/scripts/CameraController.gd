@@ -241,9 +241,10 @@ func update_camera_tracking(delta):
 		
 		# Apply subtle camera shake for dynamic movement
 		var shake_intensity = min(current_velocity.length() * 0.02, 0.1)
+		var time = Time.get_ticks_msec() * 0.001  # Convert to seconds
 		var shake = Vector3(
-			sin(Time.get_time() * 15.0) * shake_intensity,
-			cos(Time.get_time() * 12.0) * shake_intensity * 0.5,
+			sin(time * 15.0) * shake_intensity,
+			cos(time * 12.0) * shake_intensity * 0.5,
 			0
 		)
 		
