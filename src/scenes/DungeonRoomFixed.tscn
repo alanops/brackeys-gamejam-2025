@@ -57,6 +57,18 @@ height = 5.0
 radial_segments = 16
 height_segments = 8
 
+[sub_resource type="BoxMesh" id="BoxMesh_stair"]
+size = Vector3(4, 0.3, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_stair"]
+size = Vector3(4, 0.3, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ramp"]
+size = Vector3(4, 1, 6)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_ramp"]
+points = PackedVector3Array(-2, -0.5, -3, 2, -0.5, -3, -2, 0.5, 3, 2, 0.5, 3, -2, -0.5, 3, 2, -0.5, 3, -2, 0.5, -3, 2, 0.5, -3)
+
 [node name="DungeonRoom" type="Node3D"]
 script = ExtResource("1_gvkxm")
 
@@ -223,6 +235,78 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 light_color = Color(0.5, 0.8, 1, 1)
 light_energy = 1.5
 omni_range = 5.0
+
+[node name="Stairs" type="Node3D" parent="."]
+
+[node name="Step1" type="StaticBody3D" parent="Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.15, -6)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Stairs/Step1"]
+mesh = SubResource("BoxMesh_stair")
+surface_material_override/0 = SubResource("StandardMaterial3D_stone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Stairs/Step1"]
+shape = SubResource("BoxShape3D_stair")
+
+[node name="Step2" type="StaticBody3D" parent="Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.45, -5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Stairs/Step2"]
+mesh = SubResource("BoxMesh_stair")
+surface_material_override/0 = SubResource("StandardMaterial3D_stone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Stairs/Step2"]
+shape = SubResource("BoxShape3D_stair")
+
+[node name="Step3" type="StaticBody3D" parent="Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.75, -4)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Stairs/Step3"]
+mesh = SubResource("BoxMesh_stair")
+surface_material_override/0 = SubResource("StandardMaterial3D_stone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Stairs/Step3"]
+shape = SubResource("BoxShape3D_stair")
+
+[node name="Step4" type="StaticBody3D" parent="Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.05, -3)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Stairs/Step4"]
+mesh = SubResource("BoxMesh_stair")
+surface_material_override/0 = SubResource("StandardMaterial3D_stone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Stairs/Step4"]
+shape = SubResource("BoxShape3D_stair")
+
+[node name="Step5" type="StaticBody3D" parent="Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.35, -2)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Stairs/Step5"]
+mesh = SubResource("BoxMesh_stair")
+surface_material_override/0 = SubResource("StandardMaterial3D_stone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Stairs/Step5"]
+shape = SubResource("BoxShape3D_stair")
+
+[node name="TopPlatform" type="StaticBody3D" parent="Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.85, -1)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Stairs/TopPlatform"]
+mesh = SubResource("BoxMesh_stair")
+surface_material_override/0 = SubResource("StandardMaterial3D_stone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Stairs/TopPlatform"]
+shape = SubResource("BoxShape3D_stair")
+
+[node name="Ramp" type="StaticBody3D" parent="Stairs"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 8, 1, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Stairs/Ramp"]
+mesh = SubResource("BoxMesh_ramp")
+surface_material_override/0 = SubResource("StandardMaterial3D_stone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Stairs/Ramp"]
+shape = SubResource("ConvexPolygonShape3D_ramp")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 8, 4, 8)
