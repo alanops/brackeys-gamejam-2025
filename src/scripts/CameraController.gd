@@ -58,15 +58,14 @@ func _ready():
 	spring_arm.collision_mask = collision_mask
 	spring_arm.spring_length = 5.0
 	spring_arm.margin = 0.2
-	# Important: SpringArm3D needs to face backward for third person
-	spring_arm.rotation = Vector3(0, PI, 0)  # Rotate 180 degrees
 	player.add_child(spring_arm)
 	
 	# Create third person camera attached to spring arm
 	third_person_camera = Camera3D.new()
 	third_person_camera.name = "ThirdPersonCamera"
 	third_person_camera.fov = 75.0
-	third_person_camera.position = Vector3(0, 0, 0)  # Camera at the end of the arm
+	# IMPORTANT: Camera must be positioned at spring_length distance
+	third_person_camera.position = Vector3(0, 0, 5.0)  # Initial position
 	spring_arm.add_child(third_person_camera)
 	
 	# Create god mode camera
@@ -124,6 +123,8 @@ func handle_mouse_look(mouse_delta: Vector2):
 			spring_arm.rotate_y(-delta.x)
 			spring_arm.rotation.x -= delta.y
 			spring_arm.rotation.x = clamp(spring_arm.rotation.x, -PI/3, PI/4)
+			# Also rotate player body for third person
+			player.rotate_y(-delta.x)
 
 func _process(delta):
 	match camera_mode:
@@ -174,8 +175,8 @@ func update_camera_mode():
 				var rot = config.get("rotation", Vector3.ZERO)
 				spring_arm.rotation = rot
 				
-				# SpringArm3D automatically positions the camera, just ensure it's at origin
-				third_person_camera.position = Vector3(0, 0, 0)
+				# Position camera at the spring length distance
+				third_person_camera.position = Vector3(0, 0, spring_arm.spring_length)
 				
 				print("SpringArm config - Length: ", spring_arm.spring_length, 
 					  " Position: ", spring_arm.position,

@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://c8qhvmp2xvl5d"]
 
 [ext_resource type="Script" path="res://src/scripts/FirstPersonController.gd" id="1_qxvmp"]
-[ext_resource type="Script" path="res://src/scripts/CameraController.gd" id="2_camera"]
+[ext_resource type="Script" path="res://src/scripts/SimpleCameraController.gd" id="2_camera"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.35
