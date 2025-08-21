@@ -48,18 +48,25 @@ func _ready():
 	player = get_parent() as CharacterBody3D
 	first_person_camera = player.get_node("Camera3D")
 	
+	print("\nCameraController _ready()")
+	print("Player: ", player)
+	print("First person camera: ", first_person_camera)
+	
 	# Create SpringArm3D for third person cameras
 	spring_arm = SpringArm3D.new()
 	spring_arm.name = "SpringArm3D"
 	spring_arm.collision_mask = collision_mask
 	spring_arm.spring_length = 5.0
 	spring_arm.margin = 0.2
+	# Important: SpringArm3D needs to face backward for third person
+	spring_arm.rotation = Vector3(0, PI, 0)  # Rotate 180 degrees
 	player.add_child(spring_arm)
 	
 	# Create third person camera attached to spring arm
 	third_person_camera = Camera3D.new()
 	third_person_camera.name = "ThirdPersonCamera"
 	third_person_camera.fov = 75.0
+	third_person_camera.position = Vector3(0, 0, 0)  # Camera at the end of the arm
 	spring_arm.add_child(third_person_camera)
 	
 	# Create god mode camera
@@ -70,6 +77,7 @@ func _ready():
 	god_mode_camera.position = Vector3(0, 5, 5)
 	
 	# Initialize camera
+	print("Camera setup complete. SpringArm: ", spring_arm, " ThirdPersonCam: ", third_person_camera)
 	update_camera_mode()
 
 func _input(event):
@@ -166,8 +174,13 @@ func update_camera_mode():
 				var rot = config.get("rotation", Vector3.ZERO)
 				spring_arm.rotation = rot
 				
+				# SpringArm3D automatically positions the camera, just ensure it's at origin
+				third_person_camera.position = Vector3(0, 0, 0)
+				
 				print("SpringArm config - Length: ", spring_arm.spring_length, 
-					  " Position: ", spring_arm.position)
+					  " Position: ", spring_arm.position,
+					  " Camera local pos: ", third_person_camera.position,
+					  " Camera global pos: ", third_person_camera.global_position)
 
 func update_god_mode_camera(delta):
 	var speed = 10.0
