@@ -12,7 +12,7 @@ enum CameraMode {
 }
 
 @export var camera_mode: CameraMode = CameraMode.FIRST_PERSON
-@export var smooth_transition: bool = true
+@export var smooth_transition: bool = false
 @export var transition_speed: float = 8.0
 @export var mouse_sensitivity: float = 0.002
 @export var tracking_speed: float = 12.0
@@ -40,35 +40,35 @@ var auto_rotate_enabled: bool = true
 
 # Third person camera settings with improved tracking
 var third_person_distances = {
-	CameraMode.OVER_THE_SHOULDER: 2.2,
-	CameraMode.THIRD_PERSON_CLOSE: 3.0,
-	CameraMode.THIRD_PERSON_MEDIUM: 5.5,
-	CameraMode.THIRD_PERSON_FAR: 8.5,
+	CameraMode.OVER_THE_SHOULDER: 1.5,
+	CameraMode.THIRD_PERSON_CLOSE: 4.0,
+	CameraMode.THIRD_PERSON_MEDIUM: 7.0,
+	CameraMode.THIRD_PERSON_FAR: 12.0,
 	CameraMode.GOD_MODE: 0.0  # Not used in god mode
 }
 
 var third_person_heights = {
-	CameraMode.OVER_THE_SHOULDER: 1.4,
-	CameraMode.THIRD_PERSON_CLOSE: 1.8,
-	CameraMode.THIRD_PERSON_MEDIUM: 2.2,
-	CameraMode.THIRD_PERSON_FAR: 2.8,
+	CameraMode.OVER_THE_SHOULDER: 0.3,
+	CameraMode.THIRD_PERSON_CLOSE: 1.0,
+	CameraMode.THIRD_PERSON_MEDIUM: 2.0,
+	CameraMode.THIRD_PERSON_FAR: 3.5,
 	CameraMode.GOD_MODE: 0.0  # Not used in god mode
 }
 
 var third_person_angles = {
-	CameraMode.OVER_THE_SHOULDER: -5.0,
-	CameraMode.THIRD_PERSON_CLOSE: -8.0,
-	CameraMode.THIRD_PERSON_MEDIUM: -12.0,
-	CameraMode.THIRD_PERSON_FAR: -18.0,
+	CameraMode.OVER_THE_SHOULDER: 0.0,
+	CameraMode.THIRD_PERSON_CLOSE: -10.0,
+	CameraMode.THIRD_PERSON_MEDIUM: -15.0,
+	CameraMode.THIRD_PERSON_FAR: -25.0,
 	CameraMode.GOD_MODE: 0.0  # Not used in god mode
 }
 
 # Camera behavior settings per mode
 var tracking_settings = {
-	CameraMode.OVER_THE_SHOULDER: {"speed": 18.0, "offset": Vector3(1.2, 0, 0)},
-	CameraMode.THIRD_PERSON_CLOSE: {"speed": 15.0, "offset": Vector3(0.5, 0, 0)},
-	CameraMode.THIRD_PERSON_MEDIUM: {"speed": 12.0, "offset": Vector3(0.8, 0, 0)},
-	CameraMode.THIRD_PERSON_FAR: {"speed": 10.0, "offset": Vector3(1.2, 0, 0)},
+	CameraMode.OVER_THE_SHOULDER: {"speed": 18.0, "offset": Vector3(0.8, 0, 0)},
+	CameraMode.THIRD_PERSON_CLOSE: {"speed": 15.0, "offset": Vector3(0, 0, 0)},
+	CameraMode.THIRD_PERSON_MEDIUM: {"speed": 12.0, "offset": Vector3(0, 0, 0)},
+	CameraMode.THIRD_PERSON_FAR: {"speed": 10.0, "offset": Vector3(0, 0, 0)},
 	CameraMode.GOD_MODE: {"speed": 20.0, "offset": Vector3(0, 0, 0)}
 }
 
@@ -113,19 +113,14 @@ func _ready():
 
 func _input(event):
 	if event.is_action_pressed("camera_first_person"):
-		print("Switching to first person camera")
 		set_camera_mode(CameraMode.FIRST_PERSON)
 	elif event.is_action_pressed("camera_third_close"):
-		print("Switching to over the shoulder camera")
 		set_camera_mode(CameraMode.OVER_THE_SHOULDER)
 	elif event.is_action_pressed("camera_third_medium"):
-		print("Switching to third person close camera")
 		set_camera_mode(CameraMode.THIRD_PERSON_CLOSE)
 	elif event.is_action_pressed("camera_third_far"):
-		print("Switching to third person medium camera")
 		set_camera_mode(CameraMode.THIRD_PERSON_MEDIUM)
 	elif event.is_action_pressed("camera_top_down"):
-		print("Switching to god mode camera")
 		set_camera_mode(CameraMode.GOD_MODE)
 	
 	# Handle mouse look for different camera modes
@@ -169,10 +164,8 @@ func set_camera_mode(new_mode: CameraMode):
 	update_camera_mode()
 
 func update_camera_mode():
-	print("Updating camera mode to: ", camera_mode)
 	match camera_mode:
 		CameraMode.FIRST_PERSON:
-			print("Setting first person camera active")
 			first_person_camera.current = true
 			third_person_camera.current = false
 			god_mode_camera.current = false
@@ -180,7 +173,6 @@ func update_camera_mode():
 			if player.has_node("MeshInstance3D"):
 				player.get_node("MeshInstance3D").visible = false
 		CameraMode.GOD_MODE:
-			print("Setting god mode camera active")
 			first_person_camera.current = false
 			third_person_camera.current = false
 			god_mode_camera.current = true
@@ -188,7 +180,6 @@ func update_camera_mode():
 			if player.has_node("MeshInstance3D"):
 				player.get_node("MeshInstance3D").visible = true
 		_:
-			print("Setting third person camera active")
 			first_person_camera.current = false
 			third_person_camera.current = true
 			god_mode_camera.current = false
@@ -200,10 +191,11 @@ func update_camera_mode():
 			current_distance = third_person_distances.get(camera_mode, 4.0)
 			current_height = third_person_heights.get(camera_mode, 2.0)
 			current_angle = third_person_angles.get(camera_mode, -15.0)
-			print("Third person camera position: distance=", current_distance, " height=", current_height, " angle=", current_angle)
 			
-			# Always set initial position for proper tracking
+			# IMMEDIATELY jump to new position (no smooth transition on mode change)
 			apply_third_person_position()
+			# Force camera to be current after positioning
+			third_person_camera.current = true
 
 func update_third_person_camera(delta):
 	# Get current mode settings
@@ -239,23 +231,15 @@ func apply_third_person_position():
 	# Position camera arm at proper distance and height (negative Z for behind player)
 	var arm_position = Vector3(mode_offset.x, current_height - 1.6, -current_distance)
 	camera_arm.position = arm_position
-	print("Camera arm positioned at: ", arm_position)
 	
 	# Camera at origin of arm, with base rotation
 	third_person_camera.position = Vector3.ZERO
 	third_person_camera.rotation.x = deg_to_rad(current_angle)
 	third_person_camera.rotation.y = 0
 	third_person_camera.rotation.z = 0
-	print("Third person camera rotation.x: ", deg_to_rad(current_angle))
 	
 	# Reset camera arm rotation for clean slate
 	camera_arm.rotation = Vector3.ZERO
-	
-	# Make sure third person camera is enabled
-	if camera_mode != CameraMode.FIRST_PERSON:
-		third_person_camera.current = true
-		first_person_camera.current = false
-		print("Third person camera is now current: ", third_person_camera.current)
 
 func update_camera_tracking(delta):
 	# Track player movement for responsive camera behavior
