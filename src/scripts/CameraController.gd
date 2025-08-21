@@ -160,9 +160,8 @@ func update_camera_mode():
 			current_height = third_person_heights.get(camera_mode, 2.0)
 			current_angle = third_person_angles.get(camera_mode, -15.0)
 			
-			# Immediately set position if not smoothing
-			if not smooth_transition:
-				apply_third_person_position()
+			# Always set initial position for proper tracking
+			apply_third_person_position()
 
 func update_third_person_camera(delta):
 	# Get current mode settings
@@ -170,8 +169,8 @@ func update_third_person_camera(delta):
 	var mode_tracking_speed = settings.get("speed", 12.0)
 	var mode_offset = settings.get("offset", Vector3.ZERO)
 	
-	# Calculate desired position with offset
-	var base_position = Vector3(mode_offset.x, 0, current_distance)
+	# Calculate desired position: behind player at proper distance and height
+	var base_position = Vector3(mode_offset.x, current_height, current_distance)
 	desired_position = base_position
 	
 	# Apply collision detection if enabled
@@ -179,15 +178,15 @@ func update_third_person_camera(delta):
 		desired_position = check_camera_collision(desired_position)
 	
 	if smooth_transition:
-		# Smooth camera movement with velocity-based tracking
-		third_person_camera.position = third_person_camera.position.lerp(desired_position, mode_tracking_speed * delta)
+		# Position the camera arm at the proper distance
+		camera_arm.position = camera_arm.position.lerp(desired_position, mode_tracking_speed * delta)
 		
-		# Smoothly interpolate base rotation
+		# Camera itself stays at origin of camera_arm
+		third_person_camera.position = Vector3.ZERO
+		
+		# Apply base rotation angle for the camera mode
 		var target_rot = Vector3(deg_to_rad(current_angle), 0, 0)
-		var base_x_rotation = lerp_angle(third_person_camera.rotation.x, target_rot.x, transition_speed * delta)
-		
-		# Preserve user pitch input from camera_arm
-		third_person_camera.rotation.x = base_x_rotation
+		third_person_camera.rotation.x = lerp_angle(third_person_camera.rotation.x, target_rot.x, transition_speed * delta)
 	else:
 		apply_third_person_position()
 
@@ -195,10 +194,17 @@ func apply_third_person_position():
 	var settings = tracking_settings.get(camera_mode, {"speed": 12.0, "offset": Vector3.ZERO})
 	var mode_offset = settings.get("offset", Vector3.ZERO)
 	
-	third_person_camera.position = Vector3(mode_offset.x, 0, current_distance)
+	# Position camera arm at proper distance and height
+	camera_arm.position = Vector3(mode_offset.x, current_height, current_distance)
+	
+	# Camera at origin of arm, with base rotation
+	third_person_camera.position = Vector3.ZERO
 	third_person_camera.rotation.x = deg_to_rad(current_angle)
 	third_person_camera.rotation.y = 0
 	third_person_camera.rotation.z = 0
+	
+	# Reset camera arm rotation for clean slate
+	camera_arm.rotation = Vector3.ZERO
 
 func update_camera_tracking(delta):
 	# Track player movement for responsive camera behavior
