@@ -267,7 +267,7 @@ func update_camera_tracking(delta):
 	last_player_velocity = current_velocity
 	
 	# Adjust camera position based on movement direction
-	if camera_mode != CameraMode.THIRD_PERSON_TOP_DOWN and current_velocity.length() > 1.0:
+	if camera_mode != CameraMode.GOD_MODE and current_velocity.length() > 1.0:
 		# Slightly lag camera behind movement direction for cinematic feel
 		var movement_dir = current_velocity.normalized()
 		var lag_offset = -movement_dir * 0.3 * current_velocity.length() * 0.1
@@ -288,7 +288,7 @@ func update_camera_tracking(delta):
 
 func update_auto_rotation(delta):
 	# Auto-rotate camera to behind player when idle
-	if not auto_rotate_enabled or camera_mode == CameraMode.THIRD_PERSON_TOP_DOWN:
+	if not auto_rotate_enabled or camera_mode == CameraMode.GOD_MODE:
 		return
 	
 	# Check if player is moving or mouse is being used
