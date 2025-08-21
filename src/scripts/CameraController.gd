@@ -110,6 +110,11 @@ func _ready():
 	player.add_child(god_mode_camera)
 	god_mode_camera.position = Vector3(0, 5, 5)
 	
+	# Make sure all cameras start as not current
+	first_person_camera.current = false
+	third_person_camera.current = false
+	god_mode_camera.current = false
+	
 	# Initialize camera positions
 	update_camera_mode()
 	
@@ -214,6 +219,7 @@ func update_camera_mode():
 				third_person_camera.rotation.x = actual_rotation.x
 				print("Camera arm position: ", camera_arm.position)
 				print("Third person camera global position: ", third_person_camera.global_position)
+				print("Is third person camera current? ", third_person_camera.current)
 
 func update_third_person_camera(delta):
 	# Get current mode settings
