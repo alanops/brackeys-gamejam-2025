@@ -4,10 +4,11 @@ extends Node3D
 
 enum CameraMode {
 	FIRST_PERSON,
+	OVER_THE_SHOULDER,
 	THIRD_PERSON_CLOSE,
 	THIRD_PERSON_MEDIUM,
 	THIRD_PERSON_FAR,
-	THIRD_PERSON_TOP_DOWN
+	GOD_MODE
 }
 
 @export var camera_mode: CameraMode = CameraMode.FIRST_PERSON
@@ -21,6 +22,7 @@ enum CameraMode {
 var player: CharacterBody3D
 var first_person_camera: Camera3D
 var third_person_camera: Camera3D
+var god_mode_camera: Camera3D
 var camera_pivot: Node3D
 var camera_arm: Node3D
 
@@ -38,32 +40,36 @@ var auto_rotate_enabled: bool = true
 
 # Third person camera settings with improved tracking
 var third_person_distances = {
+	CameraMode.OVER_THE_SHOULDER: 2.2,
 	CameraMode.THIRD_PERSON_CLOSE: 3.0,
 	CameraMode.THIRD_PERSON_MEDIUM: 5.5,
 	CameraMode.THIRD_PERSON_FAR: 8.5,
-	CameraMode.THIRD_PERSON_TOP_DOWN: 10.0
+	CameraMode.GOD_MODE: 0.0  # Not used in god mode
 }
 
 var third_person_heights = {
+	CameraMode.OVER_THE_SHOULDER: 1.4,
 	CameraMode.THIRD_PERSON_CLOSE: 1.8,
 	CameraMode.THIRD_PERSON_MEDIUM: 2.2,
 	CameraMode.THIRD_PERSON_FAR: 2.8,
-	CameraMode.THIRD_PERSON_TOP_DOWN: 12.0
+	CameraMode.GOD_MODE: 0.0  # Not used in god mode
 }
 
 var third_person_angles = {
+	CameraMode.OVER_THE_SHOULDER: -5.0,
 	CameraMode.THIRD_PERSON_CLOSE: -8.0,
 	CameraMode.THIRD_PERSON_MEDIUM: -12.0,
 	CameraMode.THIRD_PERSON_FAR: -18.0,
-	CameraMode.THIRD_PERSON_TOP_DOWN: -75.0
+	CameraMode.GOD_MODE: 0.0  # Not used in god mode
 }
 
 # Camera behavior settings per mode
 var tracking_settings = {
+	CameraMode.OVER_THE_SHOULDER: {"speed": 18.0, "offset": Vector3(1.2, 0, 0)},
 	CameraMode.THIRD_PERSON_CLOSE: {"speed": 15.0, "offset": Vector3(0.5, 0, 0)},
 	CameraMode.THIRD_PERSON_MEDIUM: {"speed": 12.0, "offset": Vector3(0.8, 0, 0)},
 	CameraMode.THIRD_PERSON_FAR: {"speed": 10.0, "offset": Vector3(1.2, 0, 0)},
-	CameraMode.THIRD_PERSON_TOP_DOWN: {"speed": 8.0, "offset": Vector3(0, 0, 0)}
+	CameraMode.GOD_MODE: {"speed": 20.0, "offset": Vector3(0, 0, 0)}
 }
 
 var target_position: Vector3
@@ -92,6 +98,13 @@ func _ready():
 	third_person_camera.fov = 75.0
 	camera_arm.add_child(third_person_camera)
 	
+	# Create god mode camera
+	god_mode_camera = Camera3D.new()
+	god_mode_camera.name = "GodModeCamera"
+	god_mode_camera.fov = 75.0
+	player.add_child(god_mode_camera)
+	god_mode_camera.position = Vector3(0, 5, 5)
+	
 	# Initialize camera positions
 	update_camera_mode()
 	
@@ -103,40 +116,50 @@ func _input(event):
 		print("Switching to first person camera")
 		set_camera_mode(CameraMode.FIRST_PERSON)
 	elif event.is_action_pressed("camera_third_close"):
+		print("Switching to over the shoulder camera")
+		set_camera_mode(CameraMode.OVER_THE_SHOULDER)
+	elif event.is_action_pressed("camera_third_medium"):
 		print("Switching to third person close camera")
 		set_camera_mode(CameraMode.THIRD_PERSON_CLOSE)
-	elif event.is_action_pressed("camera_third_medium"):
+	elif event.is_action_pressed("camera_third_far"):
 		print("Switching to third person medium camera")
 		set_camera_mode(CameraMode.THIRD_PERSON_MEDIUM)
-	elif event.is_action_pressed("camera_third_far"):
-		print("Switching to third person far camera")
-		set_camera_mode(CameraMode.THIRD_PERSON_FAR)
 	elif event.is_action_pressed("camera_top_down"):
-		print("Switching to top down camera")
-		set_camera_mode(CameraMode.THIRD_PERSON_TOP_DOWN)
+		print("Switching to god mode camera")
+		set_camera_mode(CameraMode.GOD_MODE)
 	
-	# Handle mouse look for third person with idle detection
-	if camera_mode != CameraMode.FIRST_PERSON and event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+	# Handle mouse look for different camera modes
+	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		var mouse_delta = event.relative * mouse_sensitivity
 		
-		# Reset idle timer on mouse movement
-		idle_timer = 0.0
-		
-		# Rotate the pivot horizontally (Y axis)
-		camera_pivot.rotate_y(-mouse_delta.x)
-		
-		# Rotate the camera vertically with better limits per mode
-		var pitch_limit = 60.0
-		if camera_mode == CameraMode.THIRD_PERSON_TOP_DOWN:
-			pitch_limit = 30.0  # More restricted for top-down
-		
-		var current_x_rot = camera_arm.rotation.x
-		var new_x_rot = current_x_rot + (-mouse_delta.y)
-		new_x_rot = clamp(new_x_rot, deg_to_rad(-pitch_limit), deg_to_rad(pitch_limit))
-		camera_arm.rotation.x = new_x_rot
+		if camera_mode == CameraMode.GOD_MODE:
+			# God mode: rotate camera directly
+			god_mode_camera.rotate_y(-mouse_delta.x)
+			god_mode_camera.rotate_object_local(Vector3(1, 0, 0), -mouse_delta.y)
+			# Clamp pitch for god mode
+			var euler = god_mode_camera.rotation
+			euler.x = clamp(euler.x, -PI/2, PI/2)
+			god_mode_camera.rotation = euler
+		elif camera_mode != CameraMode.FIRST_PERSON:
+			# Third person modes
+			# Reset idle timer on mouse movement
+			idle_timer = 0.0
+			
+			# Rotate the pivot horizontally (Y axis)
+			camera_pivot.rotate_y(-mouse_delta.x)
+			
+			# Rotate the camera vertically with better limits per mode
+			var pitch_limit = 60.0
+			
+			var current_x_rot = camera_arm.rotation.x
+			var new_x_rot = current_x_rot + (-mouse_delta.y)
+			new_x_rot = clamp(new_x_rot, deg_to_rad(-pitch_limit), deg_to_rad(pitch_limit))
+			camera_arm.rotation.x = new_x_rot
 
 func _process(delta):
-	if camera_mode != CameraMode.FIRST_PERSON:
+	if camera_mode == CameraMode.GOD_MODE:
+		update_god_mode_camera(delta)
+	elif camera_mode != CameraMode.FIRST_PERSON:
 		update_third_person_camera(delta)
 		update_camera_tracking(delta)
 		update_auto_rotation(delta)
@@ -152,13 +175,23 @@ func update_camera_mode():
 			print("Setting first person camera active")
 			first_person_camera.current = true
 			third_person_camera.current = false
+			god_mode_camera.current = false
 			# Hide player mesh in first person if visible
 			if player.has_node("MeshInstance3D"):
 				player.get_node("MeshInstance3D").visible = false
+		CameraMode.GOD_MODE:
+			print("Setting god mode camera active")
+			first_person_camera.current = false
+			third_person_camera.current = false
+			god_mode_camera.current = true
+			# Show player mesh in god mode
+			if player.has_node("MeshInstance3D"):
+				player.get_node("MeshInstance3D").visible = true
 		_:
 			print("Setting third person camera active")
 			first_person_camera.current = false
 			third_person_camera.current = true
+			god_mode_camera.current = false
 			# Show player mesh in third person
 			if player.has_node("MeshInstance3D"):
 				player.get_node("MeshInstance3D").visible = true
@@ -306,17 +339,35 @@ func check_camera_collision(target_pos: Vector3) -> Vector3:
 	
 	return target_pos
 
+func update_god_mode_camera(delta):
+	# God mode camera - free flying camera with WASD + mouse
+	var speed = 10.0
+	if Input.is_action_pressed("sprint"):
+		speed *= 2.0
+	
+	# Get movement input
+	var input_dir = Vector3()
+	input_dir.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
+	input_dir.z = Input.get_action_strength("move_back") - Input.get_action_strength("move_forward")
+	input_dir.y = Input.get_action_strength("jump") - Input.get_action_strength("move_down")
+	
+	# Transform movement relative to camera orientation
+	var movement = god_mode_camera.global_transform.basis * input_dir
+	god_mode_camera.global_position += movement.normalized() * speed * delta
+
 func get_camera_mode_name() -> String:
 	match camera_mode:
 		CameraMode.FIRST_PERSON:
 			return "First Person"
+		CameraMode.OVER_THE_SHOULDER:
+			return "Over The Shoulder"
 		CameraMode.THIRD_PERSON_CLOSE:
 			return "Third Person - Close"
 		CameraMode.THIRD_PERSON_MEDIUM:
 			return "Third Person - Medium"
 		CameraMode.THIRD_PERSON_FAR:
 			return "Third Person - Far"
-		CameraMode.THIRD_PERSON_TOP_DOWN:
-			return "Top Down"
+		CameraMode.GOD_MODE:
+			return "God Mode (Free Cam)"
 		_:
 			return "Unknown"

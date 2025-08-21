@@ -25,7 +25,7 @@ func create_overlay_ui():
 	
 	# Help text
 	help_label = Label.new()
-	help_label.text = "1: First Person | 2: Third Close | 3: Third Medium\n4: Third Far | 5: Top Down"
+	help_label.text = "1: First Person | 2: Over Shoulder | 3: Third Close\n4: Third Medium | 5: God Mode (Free Cam)"
 	help_label.add_theme_font_size_override("font_size", 11)
 	help_label.add_theme_color_override("font_color", Color.GRAY)
 	vbox.add_child(help_label)
