@@ -49,6 +49,9 @@ var camera_configs = {
 var yaw: float = 0.0
 var pitch: float = 0.0
 
+# God mode position (independent of player)
+var god_mode_position: Vector3 = Vector3.ZERO
+
 func _ready():
 	player = get_parent() as CharacterBody3D
 	first_person_camera = player.get_node_or_null("Camera3D")
@@ -88,6 +91,11 @@ func handle_mouse_look(mouse_delta: Vector2):
 		player.rotate_y(-delta.x)
 		first_person_camera.rotate_x(-delta.y)
 		first_person_camera.rotation.x = clamp(first_person_camera.rotation.x, -PI/2, PI/2)
+	elif camera_mode == CameraMode.GOD_MODE:
+		# God mode free look
+		yaw -= delta.x
+		pitch -= delta.y
+		pitch = clamp(pitch, -PI/2, PI/2)
 	else:
 		# Third person rotates camera around player
 		yaw -= delta.x
@@ -142,7 +150,7 @@ func _physics_process(delta):
 	transform.basis = Basis(transform.basis.x, pitch) * transform.basis
 	camera.transform = transform
 	
-	print("Camera at: ", camera.global_position, " looking at: ", target_pos)
+	# Debug: print("Camera at: ", camera.global_position, " looking at: ", target_pos)
 
 func handle_god_mode(delta):
 	var speed = 10.0
@@ -154,8 +162,13 @@ func handle_god_mode(delta):
 	input.z = Input.get_action_strength("move_back") - Input.get_action_strength("move_forward")
 	input.y = Input.get_action_strength("jump") - Input.get_action_strength("move_down")
 	
+	# Transform input based on camera's current rotation
 	var movement = camera.global_transform.basis * input
-	camera.global_position += movement.normalized() * speed * delta
+	god_mode_position += movement.normalized() * speed * delta
+	
+	# Apply position and rotation
+	camera.global_position = god_mode_position
+	camera.rotation = Vector3(pitch, yaw, 0)
 
 func set_camera_mode(mode: CameraMode):
 	camera_mode = mode
@@ -184,7 +197,10 @@ func update_camera_mode():
 				mesh.visible = true
 			
 			# Initialize camera rotation to match player direction
-			if camera_mode != CameraMode.GOD_MODE:
+			if camera_mode == CameraMode.GOD_MODE:
+				# Initialize god mode at current camera position
+				god_mode_position = camera.global_position
+			elif camera_mode != CameraMode.GOD_MODE:
 				yaw = player.rotation.y
 
 func get_mode_name() -> String:
