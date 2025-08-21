@@ -100,14 +100,19 @@ func _ready():
 
 func _input(event):
 	if event.is_action_pressed("camera_first_person"):
+		print("Switching to first person camera")
 		set_camera_mode(CameraMode.FIRST_PERSON)
 	elif event.is_action_pressed("camera_third_close"):
+		print("Switching to third person close camera")
 		set_camera_mode(CameraMode.THIRD_PERSON_CLOSE)
 	elif event.is_action_pressed("camera_third_medium"):
+		print("Switching to third person medium camera")
 		set_camera_mode(CameraMode.THIRD_PERSON_MEDIUM)
 	elif event.is_action_pressed("camera_third_far"):
+		print("Switching to third person far camera")
 		set_camera_mode(CameraMode.THIRD_PERSON_FAR)
 	elif event.is_action_pressed("camera_top_down"):
+		print("Switching to top down camera")
 		set_camera_mode(CameraMode.THIRD_PERSON_TOP_DOWN)
 	
 	# Handle mouse look for third person with idle detection
@@ -141,14 +146,17 @@ func set_camera_mode(new_mode: CameraMode):
 	update_camera_mode()
 
 func update_camera_mode():
+	print("Updating camera mode to: ", camera_mode)
 	match camera_mode:
 		CameraMode.FIRST_PERSON:
+			print("Setting first person camera active")
 			first_person_camera.current = true
 			third_person_camera.current = false
 			# Hide player mesh in first person if visible
 			if player.has_node("MeshInstance3D"):
 				player.get_node("MeshInstance3D").visible = false
 		_:
+			print("Setting third person camera active")
 			first_person_camera.current = false
 			third_person_camera.current = true
 			# Show player mesh in third person
@@ -159,6 +167,7 @@ func update_camera_mode():
 			current_distance = third_person_distances.get(camera_mode, 4.0)
 			current_height = third_person_heights.get(camera_mode, 2.0)
 			current_angle = third_person_angles.get(camera_mode, -15.0)
+			print("Third person camera position: distance=", current_distance, " height=", current_height, " angle=", current_angle)
 			
 			# Always set initial position for proper tracking
 			apply_third_person_position()
@@ -170,7 +179,7 @@ func update_third_person_camera(delta):
 	var mode_offset = settings.get("offset", Vector3.ZERO)
 	
 	# Calculate desired position: behind player at proper distance and height
-	var base_position = Vector3(mode_offset.x, current_height, current_distance)
+	var base_position = Vector3(mode_offset.x, current_height - 1.6, -current_distance)
 	desired_position = base_position
 	
 	# Apply collision detection if enabled
@@ -194,17 +203,26 @@ func apply_third_person_position():
 	var settings = tracking_settings.get(camera_mode, {"speed": 12.0, "offset": Vector3.ZERO})
 	var mode_offset = settings.get("offset", Vector3.ZERO)
 	
-	# Position camera arm at proper distance and height
-	camera_arm.position = Vector3(mode_offset.x, current_height, current_distance)
+	# Position camera arm at proper distance and height (negative Z for behind player)
+	var arm_position = Vector3(mode_offset.x, current_height - 1.6, -current_distance)
+	camera_arm.position = arm_position
+	print("Camera arm positioned at: ", arm_position)
 	
 	# Camera at origin of arm, with base rotation
 	third_person_camera.position = Vector3.ZERO
 	third_person_camera.rotation.x = deg_to_rad(current_angle)
 	third_person_camera.rotation.y = 0
 	third_person_camera.rotation.z = 0
+	print("Third person camera rotation.x: ", deg_to_rad(current_angle))
 	
 	# Reset camera arm rotation for clean slate
 	camera_arm.rotation = Vector3.ZERO
+	
+	# Make sure third person camera is enabled
+	if camera_mode != CameraMode.FIRST_PERSON:
+		third_person_camera.current = true
+		first_person_camera.current = false
+		print("Third person camera is now current: ", third_person_camera.current)
 
 func update_camera_tracking(delta):
 	# Track player movement for responsive camera behavior
