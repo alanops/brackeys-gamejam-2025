@@ -151,7 +151,7 @@ func handle_step_up(delta):
 			var collision_height = collision.get_position().y - global_position.y
 			if collision_height > -1.0 and collision_height < MAX_STEP_HEIGHT:
 				# Add upward velocity to help climb the step
-				velocity.y = max(velocity.y, 3.0)
+				velocity.y = max(velocity.y, 5.0)
 
 func toggle_noclip():
 	noclip_enabled = !noclip_enabled
