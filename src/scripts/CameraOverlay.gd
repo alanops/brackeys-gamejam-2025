@@ -32,7 +32,7 @@ func create_overlay_ui():
 
 func _process(_delta):
 	if camera_controller:
-		mode_label.text = "Camera: " + camera_controller.get_camera_mode_name()
+		mode_label.text = "Camera: " + camera_controller.get_mode_name()
 
 func set_camera_controller(controller: Node3D):
 	camera_controller = controller
